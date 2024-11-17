@@ -131,6 +131,28 @@ local function filesystem(file)
 	return result
 end
 
+local function attributes(file)
+	local h = file
+	local file_url = tostring(h.url)
+	if not h or ya.target_family() ~= "unix" then
+		return ui.Line({})
+	end
+
+	local output, _ = Command("lsattr"):args({ "-d", file_url }):stdout(Command.PIPED):output()
+
+	if output then
+		-- Splitting the data
+		local parts = split_by_whitespace(output.stdout)
+
+		-- Display the result
+		for i, part in ipairs(parts) do
+			if i == 1 then
+				return ui.Line(ui.Span(part))
+			end
+		end
+		return ui.Line({})
+	end
+end
 function M:peek()
 	local start, cache = os.clock(), ya.file_cache(self)
 	if not cache or self:preload() ~= 1 then
@@ -187,12 +209,7 @@ function M:peek()
 				ui.Span("Attributes: "),
 			})
 		)
-		table.insert(
-			value_lines,
-			ui.Line({
-				ui.Span("------------------------"),
-			})
-		)
+		table.insert(value_lines, attributes(self.file))
 
 		table.insert(
 			label_lines,
@@ -225,7 +242,7 @@ function M:peek()
 			label_lines,
 			ui.Line({
 				ui.Span(prefix),
-				ui.Span("Created: "),
+				ui.Span("Changed: "),
 			})
 		)
 		table.insert(value_lines, fileTimestamp(self.file, "btime"))

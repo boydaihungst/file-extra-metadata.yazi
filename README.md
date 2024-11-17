@@ -10,7 +10,7 @@ Before:
 
 After:
 
-![After](assets/2024-11-17-07-42-17.png)
+![After](assets/2024-11-17-12-02-13.png)
 
 ## Installation
 
