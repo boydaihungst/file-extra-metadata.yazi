@@ -6,7 +6,7 @@ This is a Yazi plugin that replaces the default file metadata with extra informa
 
 Before:
 
-![Before](assets/2024-11-17-07-44-42.png)
+![Before](assets/2024-11-17-12-06-24.png)
 
 After:
 
