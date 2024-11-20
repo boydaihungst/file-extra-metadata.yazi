@@ -98,7 +98,7 @@ local function filesystem(file)
 		return result
 	end
 
-	local output, _ = Command("tail")
+	local output, cmd_err = Command("tail")
 		:args({ "-n", "-1" })
 		:stdin(Command("df"):args({ "-P", "-T", "-h", file_url }):stdout(Command.PIPED):spawn():take_stdout())
 		:stdout(Command.PIPED)
@@ -127,6 +127,8 @@ local function filesystem(file)
 				result.type = part
 			end
 		end
+	else
+		error("file-extra-metadata exited with error: %s. Make sure tail, df are installed", cmd_err)
 	end
 	return result
 end
@@ -138,7 +140,7 @@ local function attributes(file)
 		return ui.Line({})
 	end
 
-	local output, _ = Command("lsattr"):args({ "-d", file_url }):stdout(Command.PIPED):output()
+	local output, cmd_err = Command("lsattr"):args({ "-d", file_url }):stdout(Command.PIPED):output()
 
 	if output then
 		-- Splitting the data
@@ -150,6 +152,9 @@ local function attributes(file)
 				return ui.Line(ui.Span(part))
 			end
 		end
+		return ui.Line({})
+	else
+		error("file-extra-metadata exited with error: %s. Make sure lsattr is installed", cmd_err)
 		return ui.Line({})
 	end
 end
