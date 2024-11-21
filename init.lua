@@ -166,7 +166,7 @@ local shorten = function(_s, _t, _w)
 	return s
 end
 
-local is_supported_table = type(ui.Table) ~= "nil" or type(ui.Row) ~= "nil"
+local is_supported_table = type(ui.Table) ~= "nil" and type(ui.Row) ~= "nil"
 
 local styles = {
 	header = ui.Style():fg("green"),
@@ -236,7 +236,7 @@ local function render_table(_self, opts)
 				ui.Span("Mimetype: "),
 			}):style(styles.row_label)
 		)
-		table.insert(value_lines, ui.Line(ui.Span(_self.mime)):style(styles.row_value))
+		table.insert(value_lines, ui.Line(ui.Span(_self._mime or _self.mime)):style(styles.row_value))
 
 		table.insert(
 			label_lines,
@@ -380,18 +380,6 @@ local function render_table(_self, opts)
 			):style(styles.row_value)
 		)
 	else
-		local spotter = PLUGIN.spotter(_self.file.url, _self.mime)
-		local previewer = PLUGIN.previewer(_self.file.url, _self.mime)
-		local fetchers = PLUGIN.fetchers(_self.file.url, _self.mime)
-		local preloaders = PLUGIN.preloaders(_self.file.url, _self.mime)
-
-		for i, v in ipairs(fetchers) do
-			fetchers[i] = v.cmd
-		end
-		for i, v in ipairs(preloaders) do
-			preloaders[i] = v.cmd
-		end
-
 		rows[#rows + 1] = ui.Row({ "Metadata", "" }):style(styles.header)
 		row(prefix .. "File:", file_name)
 		row(prefix .. "Mimetype:", _self.mime)
@@ -420,7 +408,19 @@ local function render_table(_self, opts)
 					or ""
 				)
 		)
-		if opts and opts.show_plugins_section then
+		if opts and opts.show_plugins_section and PLUGIN then
+			local spotter = PLUGIN.spotter(_self.file.url, _self.mime)
+			local previewer = PLUGIN.previewer(_self.file.url, _self.mime)
+			local fetchers = PLUGIN.fetchers(_self.file.url, _self.mime)
+			local preloaders = PLUGIN.preloaders(_self.file.url, _self.mime)
+
+			for i, v in ipairs(fetchers) do
+				fetchers[i] = v.cmd
+			end
+			for i, v in ipairs(preloaders) do
+				preloaders[i] = v.cmd
+			end
+
 			rows[#rows + 1] = ui.Row({ { "", "Plugins" }, "" }):height(2):style(styles.header)
 			row(prefix .. "Spotter:", spotter and spotter.cmd or "")
 			row(prefix .. "Previewer:", previewer and previewer.cmd or "")
