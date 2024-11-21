@@ -183,8 +183,8 @@ local function render_table(_self, opts)
 	local file_name_extension = _self.file.cha.is_dir and "…" or ("." .. (_self.file.url.ext(_self.file.url) or ""))
 
 	local row = function(key, value)
-		local h = type(value) == "table" and utf8.len(value) or 1
-		rows[#rows + 1] = ui.Row({ ui.Span(key):style(styles.row_label), ui.Span(value):style(styles.row_value) })
+		local h = type(value) == "table" and #value or 1
+		rows[#rows + 1] = ui.Row({ ui.Line(key):style(styles.row_label), ui.Line(value):style(styles.row_value) })
 			:height(h)
 	end
 
