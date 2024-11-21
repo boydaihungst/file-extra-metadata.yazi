@@ -306,7 +306,7 @@ local function render_table(_self, opts)
 			label_lines,
 			ui.Line({
 				ui.Span(prefix),
-				ui.Span("Changed: "),
+				ui.Span("Created: "),
 			}):style(styles.row_label)
 		)
 		table.insert(value_lines, ui.Line(ui.Span(fileTimestamp(_self.file, "btime"))):style(styles.row_value))
@@ -389,7 +389,7 @@ local function render_table(_self, opts)
 		row(prefix .. "Links:", tostring(link_count(_self.file)))
 		row(prefix .. "Owner:", owner_group(_self.file))
 		row(prefix .. "Size:", file_size_and_folder_childs(_self.file))
-		row(prefix .. "Changed:", fileTimestamp(_self.file, "btime"))
+		row(prefix .. "Created:", fileTimestamp(_self.file, "btime"))
 		row(prefix .. "Modified:", fileTimestamp(_self.file, "mtime"))
 		row(prefix .. "Accessed:", fileTimestamp(_self.file, "atime"))
 		row(prefix .. "Filesystem:", filesystem_error or filesystem)
@@ -459,7 +459,16 @@ function M:peek()
 	ya.preview_widgets(self, render_table(self))
 end
 
-function M:seek() end
+function M:seek(units)
+	local h = cx.active.current.hovered
+	if h and h.url == self.file.url then
+		local step = math.floor(units * self.area.h / 10)
+		ya.manager_emit("peek", {
+			tostring(math.max(0, cx.active.preview.skip + step)),
+			only_if = tostring(self.file.url),
+		})
+	end
+end
 
 function M:preload()
 	local cache = ya.file_cache(self)
