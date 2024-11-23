@@ -89,7 +89,7 @@ local function get_filesystem_extra(file)
 		return result
 	end
 
-	local output, cmd_err = Command("tail")
+	local output, _ = Command("tail")
 		:args({ "-n", "-1" })
 		:stdin(Command("df"):args({ "-P", "-T", "-h", file_url }):stdout(Command.PIPED):spawn():take_stdout())
 		:stdout(Command.PIPED)
@@ -119,7 +119,7 @@ local function get_filesystem_extra(file)
 			end
 		end
 	else
-		result.error = "ERROR_CODE: " .. cmd_err .. '. "tail, df" are installed?'
+		result.error = "tail, df are installed?"
 	end
 	return result
 end
@@ -131,7 +131,7 @@ local function attributes(file)
 		return ""
 	end
 
-	local output, cmd_err = Command("lsattr"):args({ "-d", file_url }):stdout(Command.PIPED):output()
+	local output, _ = Command("lsattr"):args({ "-d", file_url }):stdout(Command.PIPED):output()
 
 	if output then
 		-- Splitting the data
@@ -145,7 +145,7 @@ local function attributes(file)
 		end
 		return ""
 	else
-		return "ERROR_CODE: " .. cmd_err .. '. "lsattr" is installed?'
+		return "lsattr is installed?"
 	end
 end
 
