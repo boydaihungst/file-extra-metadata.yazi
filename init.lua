@@ -479,7 +479,6 @@ function M:preload(job)
 end
 
 function M:spot(job)
-	ya.err(job)
 	job.area = ui.Pos({ "center", w = 80, h = 25 })
 	ya.spot_table(job, render_table(job, { show_plugins_section = true })[1]:cell_style(styles.row_value_spot_hovered))
 end
