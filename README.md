@@ -8,21 +8,21 @@ This is a Yazi plugin that replaces the default file previewer and spotter with 
 
 - Previewer
 
-  ![Before preview](assets/2024-11-17-12-06-24.png)
+  ![Before preview](statics/2024-11-17-12-06-24.png)
 
 - Spotter (yazi >= v0.4 after 21/11/2024)
 
-  ![Before spot](assets/2024-11-21-04-19-01.png)
+  ![Before spot](statics/2024-11-21-04-19-01.png)
 
 ### After:
 
 - Previewer
 
-![After previewer](assets/2024-11-21-05-27-48.png)
+![After previewer](statics/2024-11-21-05-27-48.png)
 
 - Spotter (yazi >= v0.4 after 21/11/2024)
 
-![After spotter](assets/2024-11-21-05-29-50.png)
+![After spotter](statics/2024-11-21-05-29-50.png)
 
 ## Requirements
 
