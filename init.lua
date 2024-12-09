@@ -175,7 +175,7 @@ local styles = {
 	row_value_spot_hovered = ui.Style():fg("blue"):reverse(),
 }
 
-local function render_table(job, opts)
+function M:render_table(job, opts)
 	local filesystem_extra = get_filesystem_extra(job.file)
 	local prefix = "  "
 	local label_lines, value_lines, rows = {}, {}, {}
@@ -456,7 +456,7 @@ function M:peek(job)
 		return 1
 	end
 	ya.sleep(math.max(0, PREVIEW.image_delay / 1000 + start - os.clock()))
-	ya.preview_widgets(job, render_table(job))
+	ya.preview_widgets(job, self:render_table(job))
 end
 
 function M:seek(job)
@@ -480,7 +480,10 @@ end
 
 function M:spot(job)
 	job.area = ui.Pos({ "center", w = 80, h = 25 })
-	ya.spot_table(job, render_table(job, { show_plugins_section = true })[1]:cell_style(styles.row_value_spot_hovered))
+	ya.spot_table(
+		job,
+		self:render_table(job, { show_plugins_section = true })[1]:cell_style(styles.row_value_spot_hovered)
+	)
 end
 
 return M

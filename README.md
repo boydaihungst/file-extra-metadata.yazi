@@ -1,5 +1,16 @@
 # file-extra-metadata
 
+<!--toc:start-->
+
+- [file-extra-metadata](#file-extra-metadata)
+  - [Preview](#preview)
+    - [Before:](#before)
+    - [After:](#after)
+  - [Requirements](#requirements)
+  - [Installation](#installation)
+  - [For developer](#for-developer)
+  <!--toc:end-->
+
 This is a Yazi plugin that replaces the default file previewer and spotter with extra information.
 
 ## Preview
@@ -68,4 +79,12 @@ or
     # { name = "*", run = "file" },
     { name = "*", run = "file-extra-metadata" },
   ]
+```
+
+## For developer
+
+If you want to compile this with other spotter/previewer:
+
+```lua
+require("file-extra-metadata"):render_table(job, { show_plugins_section = true })
 ```
