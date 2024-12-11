@@ -48,6 +48,18 @@ Install the plugin:
 ya pack -a boydaihungst/file-extra-metadata
 ```
 
+Add spotter keybind, makes sure not conflict with other `<Tab>` keybind in
+`manager` section:
+
+```toml
+[manager]
+keymap = [
+  # ...
+  # Spotting
+  { on = "<Tab>", run = "spot", desc = "Spot hovered file" },
+]
+```
+
 Create `~/.config/yazi/yazi.toml` and add:
 
 ```toml
