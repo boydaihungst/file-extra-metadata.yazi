@@ -13,6 +13,9 @@
 
 This is a Yazi plugin that replaces the default file previewer and spotter with extra information.
 
+> [!IMPORTANT]
+> Minimum version: yazi v25.2.7
+
 ## Preview
 
 ### Before:
@@ -21,7 +24,7 @@ This is a Yazi plugin that replaces the default file previewer and spotter with 
 
   ![Before preview](statics/2024-11-17-12-06-24.png)
 
-- Spotter (yazi >= v0.4 after 21/11/2024)
+- Spotter
 
   ![Before spot](statics/2024-11-21-04-19-01.png)
 
@@ -31,13 +34,13 @@ This is a Yazi plugin that replaces the default file previewer and spotter with 
 
 ![After previewer](statics/2024-11-21-05-27-48.png)
 
-- Spotter (yazi >= v0.4 after 21/11/2024)
+- Spotter
 
 ![After spotter](statics/2024-11-21-05-29-50.png)
 
 ## Requirements
 
-- [yazi >=0.4](https://github.com/sxyazi/yazi)
+- [yazi >= 25.2.7](https://github.com/sxyazi/yazi)
 - Tested on Linux. For MacOS, Windows: some fields will shows empty values.
 
 ## Installation
