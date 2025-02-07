@@ -1,3 +1,5 @@
+--- @since 25.2.7
+
 local M = {}
 
 local function permission(file)
@@ -452,7 +454,7 @@ end
 
 function M:peek(job)
 	local start, cache = os.clock(), ya.file_cache(job)
-	if not cache or self:preload(job) ~= 1 then
+	if not cache or not self:preload(job) then
 		return 1
 	end
 	ya.sleep(math.max(0, PREVIEW.image_delay / 1000 + start - os.clock()))
@@ -473,9 +475,9 @@ end
 function M:preload(job)
 	local cache = ya.file_cache(job)
 	if not cache or fs.cha(cache) then
-		return 1
+		return true
 	end
-	return 1
+	return true
 end
 
 function M:spot(job)
