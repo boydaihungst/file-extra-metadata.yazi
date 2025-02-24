@@ -96,6 +96,22 @@ or
   ]
 ```
 
+### Custom theme
+
+Read more: https://github.com/sxyazi/yazi/pull/2391
+
+Edit or add `yazi/theme.toml`:
+
+```toml
+[spot]
+border = { fg = "#4fa6ed" }
+title = { fg = "#4fa6ed" }
+
+# Table. Currently only support nightly.
+tbl_cell = { fg = "#4fa6ed", reversed = true }
+tbl_col = { fg = "#4fa6ed" }
+```
+
 ## For developer
 
 If you want to compile this with other spotter/previewer:
