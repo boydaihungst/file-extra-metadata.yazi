@@ -168,25 +168,21 @@ local shorten = function(_s, _t, _w)
 	return s
 end
 
-local is_supported_table = type(ui.Table) ~= "nil" and type(ui.Row) ~= "nil"
-
-local styles = {
-	header = ui.Style():fg("green"),
-	row_label = ui.Style():fg("reset"),
-	row_value = ui.Style():fg("blue"),
-	row_value_spot_hovered = ui.Style():fg("blue"):reverse(),
-}
-
 function M:render_table(job, opts)
+	local styles = {
+		header = ui.Style():fg("green"),
+		row_label = ui.Style():fg("reset"),
+		row_value = (th and th.spot and th.spot.tbl_col) or ui.Style():fg("blue"),
+	}
 	local filesystem_extra = get_filesystem_extra(job.file)
 	local prefix = "  "
-	local label_lines, value_lines, rows = {}, {}, {}
+	local rows = {}
 	local label_max_length = 15
 	local file_name_extension = job.file.cha.is_dir and "…" or ("." .. (job.file.url.ext(job.file.url) or ""))
 
 	local row = function(key, value)
 		local h = type(value) == "table" and #value or 1
-		rows[#rows + 1] = ui.Row({ ui.Line(key):style(styles.row_label), ui.Line(value):style(styles.row_value) })
+		rows[#rows + 1] = ui.Row({ ui.Line(key):style(styles.row_label), ui.Text(value):style(styles.row_value) })
 			:height(h)
 	end
 
@@ -203,253 +199,59 @@ function M:render_table(job, opts)
 	local filesystem =
 		shorten(filesystem_extra.filesystem, "", math.floor(job.area.w - label_max_length - utf8.len(prefix)))
 
-	if not is_supported_table then
-		table.insert(
-			label_lines,
-			ui.Line({
-				ui.Span("Metadata:"),
-			}):style(styles.header)
-		)
-		table.insert(
-			value_lines,
-			ui.Line({
-				ui.Span(""),
-			})
-		)
+	rows[#rows + 1] = ui.Row({ "Metadata", "" }):style(styles.header)
+	row(prefix .. "File:", file_name)
+	row(prefix .. "Mimetype:", job.mime)
+	row(prefix .. "Location:", location)
+	row(prefix .. "Mode:", permission(job.file))
+	row(prefix .. "Attributes:", attributes(job.file))
+	row(prefix .. "Links:", tostring(link_count(job.file)))
+	row(prefix .. "Owner:", owner_group(job.file))
+	row(prefix .. "Size:", file_size_and_folder_childs(job.file))
+	row(prefix .. "Created:", fileTimestamp(job.file, "btime"))
+	row(prefix .. "Modified:", fileTimestamp(job.file, "mtime"))
+	row(prefix .. "Accessed:", fileTimestamp(job.file, "atime"))
+	row(prefix .. "Filesystem:", filesystem_error or filesystem)
+	row(prefix .. "Device:", filesystem_error or filesystem_extra.device)
+	row(prefix .. "Type:", filesystem_error or filesystem_extra.type)
+	row(
+		prefix .. "Free space:",
+		filesystem_error
+			or (
+				(
+						filesystem_extra.avail_space
+						and filesystem_extra.total_space
+						and filesystem_extra.avail_space_percent
+					)
+					and (filesystem_extra.avail_space .. " / " .. filesystem_extra.total_space .. " (" .. filesystem_extra.avail_space_percent .. "%)")
+				or ""
+			)
+	)
+	if opts and opts.show_plugins_section then
+		local _PLUGIN = cf and cf.plugin or PLUGIN
+		local spotter = _PLUGIN.spotter(job.file.url, job.mime)
+		local previewer = _PLUGIN.previewer(job.file.url, job.mime)
+		local fetchers = _PLUGIN.fetchers(job.file, job.mime)
+		local preloaders = _PLUGIN.preloaders(job.file.url, job.mime)
 
-		table.insert(
-			label_lines,
-			ui.Line({
-				ui.Span(prefix),
-				ui.Span("File:"),
-			}):style(styles.row_label)
-		)
-		table.insert(
-			value_lines,
-			ui.Line({
-				ui.Span(file_name),
-			}):style(styles.row_value)
-		)
-
-		table.insert(
-			label_lines,
-			ui.Line({
-				ui.Span(prefix),
-				ui.Span("Mimetype: "),
-			}):style(styles.row_label)
-		)
-		table.insert(value_lines, ui.Line(ui.Span(job._mime or job.mime)):style(styles.row_value))
-
-		table.insert(
-			label_lines,
-			ui.Line({
-				ui.Span(prefix),
-				ui.Span("Location: "),
-			}):style(styles.row_label)
-		)
-		table.insert(
-			value_lines,
-			ui.Line({
-				ui.Span(location),
-			}):style(styles.row_value)
-		)
-
-		table.insert(
-			label_lines,
-			ui.Line({
-				ui.Span(prefix),
-				ui.Span("Mode: "),
-			}):style(styles.row_label)
-		)
-		table.insert(value_lines, ui.Line(permission(job.file)):style(styles.row_value))
-
-		table.insert(
-			label_lines,
-			ui.Line({
-				ui.Span(prefix),
-				ui.Span("Attributes: "),
-			}):style(styles.row_label)
-		)
-		table.insert(value_lines, ui.Line(ui.Span(attributes(job.file))):style(styles.row_value))
-
-		table.insert(
-			label_lines,
-			ui.Line({
-				ui.Span(prefix),
-				ui.Span("Links: "),
-			}):style(styles.row_label)
-		)
-		table.insert(
-			value_lines,
-			ui.Line({
-				ui.Span(tostring(link_count(job.file))),
-			}):style(styles.row_value)
-		)
-
-		table.insert(
-			label_lines,
-			ui.Line({
-				ui.Span(prefix),
-				ui.Span("Owner: "),
-			}):style(styles.row_label)
-		)
-		table.insert(value_lines, ui.Line(ui.Span(owner_group(job.file))):style(styles.row_value))
-
-		table.insert(
-			label_lines,
-			ui.Line({
-				ui.Span(prefix),
-				ui.Span("Size: "),
-			}):style(styles.row_label)
-		)
-		table.insert(value_lines, ui.Line(ui.Span(file_size_and_folder_childs(job.file))):style(styles.row_value))
-
-		table.insert(
-			label_lines,
-			ui.Line({
-				ui.Span(prefix),
-				ui.Span("Created: "),
-			}):style(styles.row_label)
-		)
-		table.insert(value_lines, ui.Line(ui.Span(fileTimestamp(job.file, "btime"))):style(styles.row_value))
-
-		table.insert(
-			label_lines,
-			ui.Line({
-				ui.Span(prefix),
-				ui.Span("Modified: "),
-			}):style(styles.row_label)
-		)
-		table.insert(value_lines, ui.Line(ui.Span(fileTimestamp(job.file, "mtime"))):style(styles.row_value))
-
-		table.insert(
-			label_lines,
-			ui.Line({
-				ui.Span(prefix),
-				ui.Span("Accessed: "),
-			}):style(styles.row_label)
-		)
-		table.insert(value_lines, ui.Line(ui.Span(fileTimestamp(job.file, "atime"))):style(styles.row_value))
-
-		table.insert(
-			label_lines,
-			ui.Line({
-				ui.Span(prefix),
-				ui.Span("Filesystem: "),
-			}):style(styles.row_label)
-		)
-		table.insert(value_lines, ui.Line(ui.Span(filesystem_error or filesystem)):style(styles.row_value))
-
-		table.insert(
-			label_lines,
-			ui.Line({
-				ui.Span(prefix),
-				ui.Span("Device: "),
-			}):style(styles.row_label)
-		)
-		table.insert(value_lines, ui.Line(ui.Span(filesystem_error or filesystem_extra.device)):style(styles.row_value))
-
-		table.insert(
-			label_lines,
-			ui.Line({
-				ui.Span(prefix),
-				ui.Span("Type: "),
-			}):style(styles.row_label)
-		)
-		table.insert(value_lines, ui.Line(ui.Span(filesystem_error or filesystem_extra.type)):style(styles.row_value))
-
-		table.insert(
-			label_lines,
-			ui.Line({
-				ui.Span(prefix),
-				ui.Span("Free space: "),
-			}):style(styles.row_label)
-		)
-		table.insert(
-			value_lines,
-			ui.Line(
-				ui.Span(
-					filesystem_extra.error
-						or (
-							filesystem_extra.avail_space
-							.. " / "
-							.. filesystem_extra.total_space
-							.. " ("
-							.. filesystem_extra.avail_space_percent
-							.. "%)"
-						)
-				)
-			):style(styles.row_value)
-		)
-	else
-		rows[#rows + 1] = ui.Row({ "Metadata", "" }):style(styles.header)
-		row(prefix .. "File:", file_name)
-		row(prefix .. "Mimetype:", job.mime)
-		row(prefix .. "Location:", location)
-		row(prefix .. "Mode:", permission(job.file))
-		row(prefix .. "Attributes:", attributes(job.file))
-		row(prefix .. "Links:", tostring(link_count(job.file)))
-		row(prefix .. "Owner:", owner_group(job.file))
-		row(prefix .. "Size:", file_size_and_folder_childs(job.file))
-		row(prefix .. "Created:", fileTimestamp(job.file, "btime"))
-		row(prefix .. "Modified:", fileTimestamp(job.file, "mtime"))
-		row(prefix .. "Accessed:", fileTimestamp(job.file, "atime"))
-		row(prefix .. "Filesystem:", filesystem_error or filesystem)
-		row(prefix .. "Device:", filesystem_error or filesystem_extra.device)
-		row(prefix .. "Type:", filesystem_error or filesystem_extra.type)
-		row(
-			prefix .. "Free space:",
-			filesystem_error
-				or (
-					(
-							filesystem_extra.avail_space
-							and filesystem_extra.total_space
-							and filesystem_extra.avail_space_percent
-						)
-						and (filesystem_extra.avail_space .. " / " .. filesystem_extra.total_space .. " (" .. filesystem_extra.avail_space_percent .. "%)")
-					or ""
-				)
-		)
-		if opts and opts.show_plugins_section and PLUGIN then
-			local spotter = PLUGIN.spotter(job.file.url, job.mime)
-			local previewer = PLUGIN.previewer(job.file.url, job.mime)
-			local fetchers = PLUGIN.fetchers(job.file, job.mime)
-			local preloaders = PLUGIN.preloaders(job.file.url, job.mime)
-
-			for i, v in ipairs(fetchers) do
-				fetchers[i] = v.cmd
-			end
-			for i, v in ipairs(preloaders) do
-				preloaders[i] = v.cmd
-			end
-
-			rows[#rows + 1] = ui.Row({ { "", "Plugins" }, "" }):height(2):style(styles.header)
-			row(prefix .. "Spotter:", spotter and spotter.cmd or "")
-			row(prefix .. "Previewer:", previewer and previewer.cmd or "")
-			row(prefix .. "Fetchers:", #fetchers ~= 0 and fetchers or "")
-			row(prefix .. "Preloaders:", #preloaders ~= 0 and preloaders or "")
+		for i, v in ipairs(fetchers) do
+			fetchers[i] = v.cmd
 		end
+		for i, v in ipairs(preloaders) do
+			preloaders[i] = v.cmd
+		end
+
+		rows[#rows + 1] = ui.Row({ { "", "Plugins" }, "" }):height(2):style(styles.header)
+		row(prefix .. "Spotter:", spotter and spotter.cmd or "(none)")
+		row(prefix .. "Previewer:", previewer and previewer.cmd or "(none)")
+		row(prefix .. "Fetchers:", #fetchers ~= 0 and fetchers or "(none)")
+		row(prefix .. "Preloaders:", #preloaders ~= 0 and preloaders or "(none)")
 	end
 
-	if not is_supported_table then
-		local areas = ui.Layout()
-			:direction(ui.Layout.HORIZONTAL)
-			:constraints({ ui.Constraint.Length(label_max_length), ui.Constraint.Fill(1) })
-			:split(job.area)
-		local label_area = areas[1]
-		local value_area = areas[2]
-		return {
-			ui.Text(label_lines):area(label_area):align(ui.Text.LEFT):wrap(ui.Text.WRAP_NO),
-			ui.Text(value_lines):area(value_area):align(ui.Text.LEFT):wrap(ui.Text.WRAP_NO),
-		}
-	else
-		return {
-			ui.Table(rows):area(job.area):row(1):col(1):col_style(styles.row_value):widths({
-				ui.Constraint.Length(label_max_length),
-				ui.Constraint.Fill(1),
-			}),
-		}
-	end
+	return ui.Table(rows):area(job.area):row(1):col(1):col_style(styles.row_value):widths({
+		ui.Constraint.Length(label_max_length),
+		ui.Constraint.Fill(1),
+	})
 end
 
 function M:peek(job)
@@ -458,7 +260,7 @@ function M:peek(job)
 		return 1
 	end
 	ya.sleep(math.max(0, PREVIEW.image_delay / 1000 + start - os.clock()))
-	ya.preview_widgets(job, self:render_table(job))
+	ya.preview_widgets(job, { self:render_table(job) })
 end
 
 function M:seek(job)
@@ -484,7 +286,8 @@ function M:spot(job)
 	job.area = ui.Pos({ "center", w = 80, h = 25 })
 	ya.spot_table(
 		job,
-		self:render_table(job, { show_plugins_section = true })[1]:cell_style(styles.row_value_spot_hovered)
+		self:render_table(job, { show_plugins_section = true })
+			:cell_style((th and th.spot and th.spot.tbl_cell) or ui.Style():fg("blue"):reverse())
 	)
 end
 
