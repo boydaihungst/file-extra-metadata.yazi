@@ -228,7 +228,7 @@ function M:render_table(job, opts)
 			)
 	)
 	if opts and opts.show_plugins_section then
-		local _PLUGIN = cf and cf.plugin or PLUGIN
+		local _PLUGIN = rt and rt.plugin or PLUGIN
 		local spotter = _PLUGIN.spotter(job.file.url, job.mime)
 		local previewer = _PLUGIN.previewer(job.file.url, job.mime)
 		local fetchers = _PLUGIN.fetchers(job.file, job.mime)
