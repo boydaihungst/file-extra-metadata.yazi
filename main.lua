@@ -170,7 +170,7 @@ end
 
 function M:render_table(job, opts)
 	local styles = {
-		header = ui.Style():fg("green"),
+		header = th and th.spot and th.spot.title or ui.Style():fg("green"),
 		row_label = ui.Style():fg("reset"),
 		row_value = (th and th.spot and th.spot.tbl_col) or ui.Style():fg("blue"),
 	}
