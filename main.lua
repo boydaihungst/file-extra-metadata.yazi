@@ -1,6 +1,4 @@
---- @since 25.2.7
---- NOTE: REMOVE :parent() :name() :is_hovered() :ext() after upgrade to v25.4.4
---- https://github.com/sxyazi/yazi/pull/2572
+--- @since 25.4.8
 
 local M = {}
 
@@ -180,8 +178,7 @@ function M:render_table(job, opts)
 	local prefix = "  "
 	local rows = {}
 	local label_max_length = 15
-	local file_name_extension = job.file.cha.is_dir and "…"
-		or ("." .. ((type(job.file.url.ext) == "function" and job.file.url:ext() or job.file.url.ext) or ""))
+	local file_name_extension = job.file.cha.is_dir and "…" or ("." .. (job.file.url.ext or ""))
 
 	local row = function(key, value)
 		local h = type(value) == "table" and #value or 1
@@ -194,11 +191,8 @@ function M:render_table(job, opts)
 		file_name_extension,
 		math.floor(job.area.w - label_max_length - utf8.len(file_name_extension))
 	)
-	local location = shorten(
-		tostring(type(job.file.url.parent) == "function" and job.file.url:parent() or job.file.url.parent),
-		"",
-		math.floor(job.area.w - label_max_length - utf8.len(prefix))
-	)
+	local location =
+		shorten(tostring(job.file.url.parent), "", math.floor(job.area.w - label_max_length - utf8.len(prefix)))
 	local filesystem_error = filesystem_extra.error
 			and shorten(filesystem_extra.error, "", math.floor(job.area.w - label_max_length - utf8.len(prefix)))
 		or nil

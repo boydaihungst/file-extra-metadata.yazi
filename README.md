@@ -14,7 +14,7 @@
 This is a Yazi plugin that replaces the default file previewer and spotter with extra information.
 
 > [!IMPORTANT]
-> Minimum version: yazi v25.2.7
+> Minimum version: yazi v25.4.8
 
 ## Preview
 
