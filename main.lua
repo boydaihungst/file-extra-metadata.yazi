@@ -91,15 +91,17 @@ local function get_filesystem_extra(file)
 		return result
 	end
 
-	local output, _ = Command("tail")
-		:args({ "-n", "-1" })
-		:stdin(Command("df"):args({ "-P", "-T", "-h", file_url }):stdout(Command.PIPED):spawn():take_stdout())
-		:stdout(Command.PIPED)
-		:output()
-
-	if output then
+	local child, err = Command("df"):arg({ "-P", "-T", "-h", file_url }):stdout(Command.PIPED):spawn()
+	if child then
+		-- Ignore header
+		local _, event = child:read_line()
+		if event ~= 0 then
+			result.error = "df are installed?"
+			return result
+		end
+		local output, _ = child:read_line()
 		-- Splitting the data
-		local parts = split_by_whitespace(output.stdout)
+		local parts = split_by_whitespace(output)
 
 		-- Display the result
 		for i, part in ipairs(parts) do
@@ -121,7 +123,7 @@ local function get_filesystem_extra(file)
 			end
 		end
 	else
-		result.error = "tail, df are installed?"
+		result.error = "df are installed?"
 	end
 	return result
 end
@@ -267,7 +269,7 @@ function M:seek(job)
 	local h = cx.active.current.hovered
 	if h and h.url == job.file.url then
 		local step = math.floor(job.units * job.area.h / 10)
-		ya.manager_emit("peek", {
+		ya.mgr_emit("peek", {
 			tostring(math.max(0, cx.active.preview.skip + step)),
 			only_if = tostring(job.file.url),
 		})
