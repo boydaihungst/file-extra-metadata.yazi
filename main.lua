@@ -230,11 +230,10 @@ function M:render_table(job, opts)
 			)
 	)
 	if opts and opts.show_plugins_section then
-		local _PLUGIN = rt and rt.plugin or PLUGIN
-		local spotter = _PLUGIN.spotter(job.file.url, job.mime)
-		local previewer = _PLUGIN.previewer(job.file.url, job.mime)
-		local fetchers = _PLUGIN.fetchers(job.file, job.mime)
-		local preloaders = _PLUGIN.preloaders(job.file.url, job.mime)
+		local spotter = rt.plugin.spotter(job.file.url, job.mime)
+		local previewer = rt.plugin.previewer(job.file.url, job.mime)
+		local fetchers = rt.plugin.fetchers(job.file, job.mime)
+		local preloaders = rt.plugin.preloaders(job.file.url, job.mime)
 
 		for i, v in ipairs(fetchers) do
 			fetchers[i] = v.cmd
@@ -261,7 +260,7 @@ function M:peek(job)
 	if not cache or not self:preload(job) then
 		return 1
 	end
-	ya.sleep(math.max(0, (rt and rt.preview or PREVIEW).image_delay / 1000 + start - os.clock()))
+	ya.sleep(math.max(0, rt.preview.image_delay / 1000 + start - os.clock()))
 	ya.preview_widgets(job, { self:render_table(job) })
 end
 
