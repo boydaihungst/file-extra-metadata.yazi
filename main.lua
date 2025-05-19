@@ -172,9 +172,9 @@ end
 
 function M:render_table(job, opts)
 	local styles = {
-		header = th and th.spot and th.spot.title or ui.Style():fg("green"),
+		header = th.spot.title or ui.Style():fg("green"),
 		row_label = ui.Style():fg("reset"),
-		row_value = (th and th.spot and th.spot.tbl_col) or ui.Style():fg("blue"),
+		row_value = th.spot.tbl_col or ui.Style():fg("blue"),
 	}
 	local filesystem_extra = get_filesystem_extra(job.file)
 	local prefix = "  "
@@ -288,7 +288,7 @@ function M:spot(job)
 	ya.spot_table(
 		job,
 		self:render_table(job, { show_plugins_section = true })
-			:cell_style((th and th.spot and th.spot.tbl_cell) or ui.Style():fg("blue"):reverse())
+			:cell_style(th.spot.tbl_cell or ui.Style():fg("blue"):reverse())
 	)
 end
 
