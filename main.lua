@@ -1,4 +1,4 @@
---- @since 25.4.8
+--- @since 25.5.28
 
 local M = {}
 
@@ -135,7 +135,7 @@ local function attributes(file)
 		return ""
 	end
 
-	local output, _ = Command("lsattr"):args({ "-d", file_url }):stdout(Command.PIPED):output()
+	local output, _ = Command("lsattr"):arg({ "-d", file_url }):stdout(Command.PIPED):output()
 
 	if output then
 		-- Splitting the data
@@ -261,14 +261,14 @@ function M:peek(job)
 		return 1
 	end
 	ya.sleep(math.max(0, rt.preview.image_delay / 1000 + start - os.clock()))
-	ya.preview_widgets(job, { self:render_table(job) })
+	ya.preview_widget(job, { self:render_table(job) })
 end
 
 function M:seek(job)
 	local h = cx.active.current.hovered
 	if h and h.url == job.file.url then
 		local step = math.floor(job.units * job.area.h / 10)
-		ya.mgr_emit("peek", {
+		ya.emit("peek", {
 			tostring(math.max(0, cx.active.preview.skip + step)),
 			only_if = tostring(job.file.url),
 		})
