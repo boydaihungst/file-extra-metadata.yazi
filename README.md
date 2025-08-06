@@ -66,6 +66,7 @@ keymap = [
 ```
 
 Create `~/.config/yazi/yazi.toml` and add:
+For yazi nightly replace `name` with `url`
 
 ```toml
 [plugin]
