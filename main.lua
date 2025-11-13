@@ -231,7 +231,7 @@ function M:render_table(job, opts)
 	)
 	if opts and opts.show_plugins_section then
 		-- TODO: Remove this after the next release
-		local is_yazi_nightly, _ = pcall(require, "mime.file")
+		local is_yazi_nightly, _ = pcall(require, "mime.dir")
 		local spotter = rt.plugin.spotter(is_yazi_nightly and job.file or job.file.url, job.mime)
 		local previewer = rt.plugin.previewer(is_yazi_nightly and job.file or job.file.url, job.mime)
 		local fetchers = rt.plugin.fetchers(job.file, job.mime)
