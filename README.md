@@ -51,18 +51,18 @@ Install the plugin:
 ya pkg add boydaihungst/file-extra-metadata
 ```
 
-Create `~/.config/yazi/yazi.toml` and add:
-For yazi (>=v25.12.29) replace `name` with `url`
+Create `~/.config/yazi/yazi.toml` and add:  
+For yazi < v25.12.29 (29/12/2025) replace `url` with `name`
 
 ```toml
 [plugin]
   append_previewers = [
-    { name = "*", run = "file-extra-metadata" },
+    { url = "*", run = "file-extra-metadata" },
   ]
 
   # Setup keybind for spotter: https://github.com/sxyazi/yazi/pull/1802
   append_spotters = [
-    { name = "*", run = "file-extra-metadata" },
+    { url = "*", run = "file-extra-metadata" },
   ]
 ```
 
@@ -73,7 +73,7 @@ or
   previewers = [
     # ... the rest
     # disable default file plugin { name = "*", run = "file" },
-    { name = "*", run = "file-extra-metadata" },
+    { url = "*", run = "file-extra-metadata" },
   ]
 
   # Setup keybind for spotter: https://github.com/sxyazi/yazi/pull/1802
@@ -81,7 +81,7 @@ or
     # ... the rest
     # Fallback
     # { name = "*", run = "file" },
-    { name = "*", run = "file-extra-metadata" },
+    { url = "*", run = "file-extra-metadata" },
   ]
 ```
 
@@ -103,7 +103,7 @@ tbl_col = { fg = "#4fa6ed" }
 
 ## For developer
 
-If you want to compile this with other spotter/previewer:
+If you want to combine this with other spotter/previewer:
 
 ```lua
 require("file-extra-metadata"):render_table(job, { show_plugins_section = true })

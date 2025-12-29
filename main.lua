@@ -2,6 +2,18 @@
 
 local M = {}
 
+local STATE_KEY = {
+	ALTER_DF_COMMAND = "ALTER_DF_COMMAND",
+}
+
+local set_state = ya.sync(function(state, key, value)
+	state[key] = value
+end)
+
+local get_state = ya.sync(function(state, key)
+	return state[key]
+end)
+
 local function permission(file)
 	local h = file
 	if not h then
@@ -93,26 +105,34 @@ local function get_filesystem_extra(file)
 	if not h or ya.target_family() ~= "unix" then
 		return result
 	end
+	local output, child
 
-	local child, err = Command("df"):arg({ "-P", "-T", "-h", tostring(file_url) }):stdout(Command.PIPED):spawn()
-	local output = nil
+	local alter_df_command = get_state(STATE_KEY.ALTER_DF_COMMAND)
+	if not alter_df_command then
+		child, _ = Command("df"):arg({ "-P", "-T", "-h", tostring(file_url) }):stdout(Command.PIPED):spawn()
 
-	if child then
-		-- Ignore header
-		local _, event = child:read_line()
-		if event == 0 then
-			output, _ = child:read_line()
+		if child then
+			-- Ignore header
+			local _, event = child:read_line()
+			if event == 0 then
+				output, _ = child:read_line()
+			end
+			child:start_kill()
 		end
 	end
 
 	-- Fallback for macOS/BSD if -T failed (empty output or error)
 	if not output or output == "" then
-		child, err = Command("df"):arg({ "-P", "-h", tostring(file_url) }):stdout(Command.PIPED):spawn()
+		if not alter_df_command then
+			set_state(STATE_KEY.ALTER_DF_COMMAND, true)
+		end
+		child, _ = Command("df"):arg({ "-P", "-h", tostring(file_url) }):stdout(Command.PIPED):spawn()
 		if child then
 			local _, event = child:read_line() -- skip header
 			if event == 0 then
 				output, _ = child:read_line()
 			end
+			child:start_kill()
 		end
 	end
 
@@ -122,8 +142,8 @@ local function get_filesystem_extra(file)
 
 		-- Display the result
 		if #parts >= 7 then
-			result.filesystem = is_virtual and (parts[1] .. " (vfs)") or parts[1]
-			result.device = is_virtual and (parts[7] .. " (vfs)") or parts[7]
+			result.filesystem = is_virtual and (parts[7] .. " (vfs)") or parts[7]
+			result.device = is_virtual and (parts[1] .. " (vfs)") or parts[1]
 			result.total_space = parts[3]
 			result.used_space = parts[4]
 			result.avail_space = parts[5]
@@ -131,14 +151,14 @@ local function get_filesystem_extra(file)
 			result.avail_space_percent = 100 - tonumber((string.match(parts[6], "%d+") or "0"))
 			result.type = is_virtual and (parts[2] .. " (vfs)") or parts[2]
 		else
-			result.filesystem = is_virtual and (parts[1] .. " (vfs)") or parts[1]
+			result.filesystem = is_virtual and (parts[6] .. " (vfs)") or parts[6]
 			-- result.device (Type) is missing in df output, fetch from mount
 			result.total_space = parts[2]
 			result.used_space = parts[3]
 			result.avail_space = parts[4]
 			result.used_space_percent = parts[5]
 			result.avail_space_percent = 100 - tonumber((string.match(parts[5], "%d+") or "0"))
-			result.device = is_virtual and (parts[6] .. " (vfs)") or parts[6]
+			result.device = is_virtual and (parts[1] .. " (vfs)") or parts[1]
 
 			local mount_child = Command("mount"):stdout(Command.PIPED):spawn()
 			if mount_child then
@@ -161,7 +181,7 @@ local function get_filesystem_extra(file)
 		end
 		result.is_virtual = is_virtual
 	else
-		result.error = "df are installed?"
+		result.error = "df error: check install"
 	end
 	return result
 end
