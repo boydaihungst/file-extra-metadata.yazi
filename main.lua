@@ -161,7 +161,7 @@ local function get_filesystem_extra(file)
 		end
 		result.is_virtual = is_virtual
 	else
-		result.error = "df are installed?"
+		result.error = "df error: check install"
 	end
 	return result
 end
@@ -190,7 +190,7 @@ local function attributes(file)
 		end
 		return ""
 	else
-		return "lsattr is installed?"
+		return "lsattr error: check install"
 	end
 end
 
