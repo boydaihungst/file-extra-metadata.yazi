@@ -123,13 +123,13 @@ local function get_filesystem_extra(file)
 		-- Display the result
 		if #parts >= 7 then
 			result.filesystem = is_virtual and (parts[1] .. " (vfs)") or parts[1]
-			result.device = is_virtual and (parts[2] .. " (vfs)") or parts[2]
+			result.device = is_virtual and (parts[7] .. " (vfs)") or parts[7]
 			result.total_space = parts[3]
 			result.used_space = parts[4]
 			result.avail_space = parts[5]
 			result.used_space_percent = parts[6]
 			result.avail_space_percent = 100 - tonumber((string.match(parts[6], "%d+") or "0"))
-			result.type = is_virtual and (parts[7] .. " (vfs)") or parts[7]
+			result.type = is_virtual and (parts[2] .. " (vfs)") or parts[2]
 		else
 			result.filesystem = is_virtual and (parts[1] .. " (vfs)") or parts[1]
 			-- result.device (Type) is missing in df output, fetch from mount
@@ -138,7 +138,7 @@ local function get_filesystem_extra(file)
 			result.avail_space = parts[4]
 			result.used_space_percent = parts[5]
 			result.avail_space_percent = 100 - tonumber((string.match(parts[5], "%d+") or "0"))
-			result.type = is_virtual and (parts[6] .. " (vfs)") or parts[6]
+			result.device = is_virtual and (parts[6] .. " (vfs)") or parts[6]
 
 			local mount_child = Command("mount"):stdout(Command.PIPED):spawn()
 			if mount_child then
@@ -152,7 +152,7 @@ local function get_filesystem_extra(file)
 					if s == 1 then
 						local fstype = line:match("%(([^,]+)")
 						if fstype then
-							result.device = is_virtual and (fstype .. " (vfs)") or fstype
+							result.type = is_virtual and (fstype .. " (vfs)") or fstype
 						end
 						break
 					end
