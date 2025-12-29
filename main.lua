@@ -183,12 +183,7 @@ local function attributes(file)
 		local parts = split_by_whitespace(output.stdout)
 
 		-- Display the result
-		for i, part in ipairs(parts) do
-			if i == 1 then
-				return part
-			end
-		end
-		return ""
+		return parts[1]
 	else
 		return "lsattr is installed?"
 	end
