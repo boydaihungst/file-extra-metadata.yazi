@@ -122,24 +122,14 @@ local function get_filesystem_extra(file)
 
 		-- Display the result
 		if #parts >= 7 then
-			for i, part in ipairs(parts) do
-				if i == 1 then
-					result.filesystem = is_virtual and (part .. " (vfs)") or part
-				elseif i == 2 then
-					result.device = is_virtual and (part .. " (vfs)") or part
-				elseif i == 3 then
-					result.total_space = part
-				elseif i == 4 then
-					result.used_space = part
-				elseif i == 5 then
-					result.avail_space = part
-				elseif i == 6 then
-					result.used_space_percent = part
-					result.avail_space_percent = 100 - tonumber((string.match(part, "%d+") or "0"))
-				elseif i == 7 then
-					result.type = is_virtual and (part .. " (vfs)") or part
-				end
-			end
+			result.filesystem = is_virtual and (parts[1] .. " (vfs)") or parts[1]
+			result.device = is_virtual and (parts[2] .. " (vfs)") or parts[2]
+			result.total_space = parts[3]
+			result.used_space = parts[4]
+			result.avail_space = parts[5]
+			result.used_space_percent = parts[6]
+			result.avail_space_percent = 100 - tonumber((string.match(parts[6], "%d+") or "0"))
+			result.type = is_virtual and (parts[7] .. " (vfs)") or parts[7]
 		else
 			result.filesystem = is_virtual and (parts[1] .. " (vfs)") or parts[1]
 			-- result.device (Type) is missing in df output, fetch from mount
