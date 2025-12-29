@@ -41,7 +41,7 @@ This is a Yazi plugin that replaces the default file previewer and spotter with 
 ## Requirements
 
 - [yazi >= 25.5.28](https://github.com/sxyazi/yazi)
-- Tested on Linux. For MacOS, Windows: some fields will shows empty values.
+- Tested on Linux and MacOS. For Windows: some fields will shows empty values.
 
 ## Installation
 

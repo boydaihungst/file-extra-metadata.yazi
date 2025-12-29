@@ -186,32 +186,91 @@ local function get_filesystem_extra(file)
 	return result
 end
 
+-- macOS lsattr emulation via ls -lO
+local MACOS_FLAGS = {
+  uappnd = 1, sappnd = 1,  -- append-only
+  arch = 2,
+  compressed = 3,
+  nodump = 4,
+  hidden = 8,
+  uchg = 9, schg = 9,      -- user/system immutable
+  opaque = 10,
+  tracked = 14,
+  restricted = 15,
+}
+
+local MACOS_CHARS = {
+  "-", "a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","v",
+}
+
+local function macos_parse_flags(f)
+  local a = string.rep("-", 22)
+  if f == "-" or f == "" then
+    return a
+  end
+  for flag in f:gmatch("[^,]+") do
+    local key = flag:match("^%s*(.-)%s*$")
+    local pos = MACOS_FLAGS[key]
+    if pos then
+      a = a:sub(1, pos - 1) .. (MACOS_CHARS[pos] or "-") .. a:sub(pos + 1)
+    end
+  end
+  return a
+end
+
+-- file attributes function
 local function attributes(file)
-	local h = file
-	local file_url = h.url
-	local is_virtual = file_url.scheme and file_url.scheme.is_virtual
-	file_url = is_virtual and Url(file_url.scheme.cache .. tostring(file_url.path)) or file_url
+  local h = file
+  if not h or ya.target_family() ~= "unix" then
+    return ""
+  end
 
-	if not h or ya.target_family() ~= "unix" then
-		return ""
-	end
+  local file_url = h.url
+  local is_virtual = file_url.scheme and file_url.scheme.is_virtual
+  file_url = is_virtual and Url(file_url.scheme.cache .. tostring(file_url.path)) or file_url
 
-	local output, _ = Command("lsattr"):arg({ "-d", tostring(file_url) }):stdout(Command.PIPED):output()
+  -- 1. Try real lsattr first
+  local ok_lsattr, output = pcall(function()
+    return Command("lsattr")
+      :arg({ "-d", tostring(file_url) })
+      :stdout(Command.PIPED)
+      :output()
+  end)
 
-	if output then
-		-- Splitting the data
-		local parts = split_by_whitespace(output.stdout)
+  if ok_lsattr and output and output.stdout and output.stdout ~= "" then
+    local parts = split_by_whitespace(output.stdout)
+    if parts[1] and parts[1] ~= "" then
+      return parts[1]
+    end
+  end
 
-		-- Display the result
-		for i, part in ipairs(parts) do
-			if i == 1 then
-				return part
-			end
-		end
-		return ""
-	else
-		return "lsattr error: check install"
-	end
+  -- 2. macOS-style: emulate lsattr via ls -lO
+  -- ya.target_os or similar; if not available, you can omit this guard and just try ls -lO.
+  local target_os = ya.target_os and ya.target_os() or ""
+  if target_os:match("darwin") or target_os:match("mac") then
+    local ok_ls, out2 = pcall(function()
+      return Command("ls")
+        :arg({ "-lO", tostring(file_url) })
+        :stdout(Command.PIPED)
+        :output()
+    end)
+
+    if ok_ls and out2 and out2.stdout and out2.stdout ~= "" then
+      -- First non-empty line
+      local line = out2.stdout:match("[^\n]+")
+      if line then
+        local parts = {}
+        for w in line:gmatch("%S+") do
+          table.insert(parts, w)
+        end
+        local flags = parts[5] or "-"
+        return macos_parse_flags(flags)
+      end
+    end
+  end
+
+  -- 3. Last-resort message
+  return "lsattr/ls -lO unavailable"
 end
 
 ---shorten string
