@@ -52,7 +52,7 @@ ya pkg add boydaihungst/file-extra-metadata
 ```
 
 Create `~/.config/yazi/yazi.toml` and add:
-For yazi nightly replace `name` with `url`
+For yazi (>=v25.12.29) replace `name` with `url`
 
 ```toml
 [plugin]
