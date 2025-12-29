@@ -95,37 +95,81 @@ local function get_filesystem_extra(file)
 	end
 
 	local child, err = Command("df"):arg({ "-P", "-T", "-h", tostring(file_url) }):stdout(Command.PIPED):spawn()
+	local output = nil
+
 	if child then
 		-- Ignore header
 		local _, event = child:read_line()
-		if event ~= 0 then
-			result.error = "df are installed?"
-			return result
+		if event == 0 then
+			output, _ = child:read_line()
 		end
-		local output, _ = child:read_line()
+	end
+
+	-- Fallback for macOS/BSD if -T failed (empty output or error)
+	if not output or output == "" then
+		child, err = Command("df"):arg({ "-P", "-h", tostring(file_url) }):stdout(Command.PIPED):spawn()
+		if child then
+			local _, event = child:read_line() -- skip header
+			if event == 0 then
+				output, _ = child:read_line()
+			end
+		end
+	end
+
+	if output and output ~= "" then
 		-- Splitting the data
 		local parts = split_by_whitespace(output)
 
 		-- Display the result
-		for i, part in ipairs(parts) do
-			if i == 1 then
-				result.filesystem = is_virtual and (part .. " (vfs)") or part
-			elseif i == 2 then
-				result.device = is_virtual and (part .. " (vfs)") or part
-			elseif i == 3 then
-				result.total_space = part
-			elseif i == 4 then
-				result.used_space = part
-			elseif i == 5 then
-				result.avail_space = part
-			elseif i == 6 then
-				result.used_space_percent = part
-				result.avail_space_percent = 100 - tonumber((string.match(part, "%d+") or "0"))
-			elseif i == 7 then
-				result.type = is_virtual and (part .. " (vfs)") or part
+		if #parts >= 7 then
+			for i, part in ipairs(parts) do
+				if i == 1 then
+					result.filesystem = is_virtual and (part .. " (vfs)") or part
+				elseif i == 2 then
+					result.device = is_virtual and (part .. " (vfs)") or part
+				elseif i == 3 then
+					result.total_space = part
+				elseif i == 4 then
+					result.used_space = part
+				elseif i == 5 then
+					result.avail_space = part
+				elseif i == 6 then
+					result.used_space_percent = part
+					result.avail_space_percent = 100 - tonumber((string.match(part, "%d+") or "0"))
+				elseif i == 7 then
+					result.type = is_virtual and (part .. " (vfs)") or part
+				end
 			end
-			result.is_virtual = is_virtual
+		else
+			result.filesystem = is_virtual and (parts[1] .. " (vfs)") or parts[1]
+			-- result.device (Type) is missing in df output, fetch from mount
+			result.total_space = parts[2]
+			result.used_space = parts[3]
+			result.avail_space = parts[4]
+			result.used_space_percent = parts[5]
+			result.avail_space_percent = 100 - tonumber((string.match(parts[5], "%d+") or "0"))
+			result.type = is_virtual and (parts[6] .. " (vfs)") or parts[6]
+
+			local mount_child = Command("mount"):stdout(Command.PIPED):spawn()
+			if mount_child then
+				while true do
+					local line, event = mount_child:read_line()
+					if not line or event ~= 0 then
+						break
+					end
+					-- Check if line starts with filesystem (e.g. /dev/disk1s1 on ...)
+					local s, e = line:find(parts[1] .. " on ", 1, true)
+					if s == 1 then
+						local fstype = line:match("%(([^,]+)")
+						if fstype then
+							result.device = is_virtual and (fstype .. " (vfs)") or fstype
+						end
+						break
+					end
+				end
+			end
 		end
+		result.is_virtual = is_virtual
 	else
 		result.error = "df are installed?"
 	end
