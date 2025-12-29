@@ -26,17 +26,17 @@ This is a Yazi plugin that replaces the default file previewer and spotter with 
 
 - Spotter
 
-  ![Before spot](statics/2024-11-21-04-19-01.png)
+  ![Before spot](statics/2025-12-29-before_spotter.png)
 
 ### After:
 
 - Previewer
 
-![After previewer](statics/2024-11-21-05-27-48.png)
+  ![After previewer](statics/2024-11-21-05-27-48.png)
 
 - Spotter
 
-![After spotter](statics/2024-11-21-05-29-50.png)
+  ![After spotter](statics/2025-12-29-after_spotter.png)
 
 ## Requirements
 
