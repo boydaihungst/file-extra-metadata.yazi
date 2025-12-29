@@ -99,7 +99,7 @@ local function get_filesystem_extra(file)
 		-- Ignore header
 		local _, event = child:read_line()
 		if event ~= 0 then
-			result.error = "df are installed?"
+			result.error = "df error: check install"
 			return result
 		end
 		local output, _ = child:read_line()
@@ -127,7 +127,7 @@ local function get_filesystem_extra(file)
 			result.is_virtual = is_virtual
 		end
 	else
-		result.error = "df are installed?"
+		result.error = "df error: check install"
 	end
 	return result
 end
@@ -156,7 +156,7 @@ local function attributes(file)
 		end
 		return ""
 	else
-		return "lsattr is installed?"
+		return "lsattr error: check install"
 	end
 end
 
