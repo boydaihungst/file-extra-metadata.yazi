@@ -52,7 +52,7 @@ end
 
 local file_size_and_folder_childs = function(file)
 	local h = file
-	if not h or h.cha.is_link then
+	if not h then
 		return ""
 	end
 
@@ -65,7 +65,7 @@ end
 ---@return any
 local function fileTimestamp(file, type)
 	local h = file
-	if not h or h.cha.is_link then
+	if not h then
 		return ""
 	end
 	local time = math.floor(h.cha[type] or 0)
@@ -190,6 +190,9 @@ end
 local function attributes(file)
 	local h = file
 	local file_url = h.url
+	if h.cha.is_link then
+		file_url = Url(h.link_to)
+	end
 	local is_virtual = file_url.scheme and file_url.scheme.is_virtual
 	file_url = is_virtual and (file.path or Url(file_url.scheme.cache .. tostring(file_url.path))) or file_url
 
@@ -276,6 +279,9 @@ function M:render_table(job, opts)
 	row(prefix .. "Mode:", permission(job.file))
 	row(prefix .. "Attributes:", attributes(job.file))
 	row(prefix .. "Links:", tostring(link_count(job.file)))
+	if job.file.cha.is_link then
+		row(prefix .. "Linked:", tostring(job.file.cha.is_link and job.file.link_to))
+	end
 	row(prefix .. "Owner:", owner_group(job.file))
 	row(prefix .. "Size:", file_size_and_folder_childs(job.file))
 	row(prefix .. "Created:", fileTimestamp(job.file, "btime"))
