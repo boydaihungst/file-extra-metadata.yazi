@@ -101,8 +101,7 @@ local function get_filesystem_extra(file)
 	local h = file
 	local file_url = h.url
 	local is_virtual = file_url.scheme and file_url.scheme.is_virtual
-	file_url = is_virtual and (file.path or Url(file_url.scheme.cache .. tostring(file_url.path)))
-		or (file_url.path or file_url.url)
+	file_url = is_virtual and (file.path or Url(file_url.scheme.cache .. tostring(file_url.path))) or file_url
 	if not h or ya.target_family() ~= "unix" then
 		return result
 	end
