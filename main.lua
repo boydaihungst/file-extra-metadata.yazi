@@ -308,22 +308,23 @@ function M:render_table(job, opts)
 
 		rows[#rows + 1] = ui.Row({ { "", "Plugins" }, "" }):height(2):style(styles.header)
 		if type(rt.plugin.spotters.match) ~= "nil" then
-			for _, v in pairs(rt.plugin.spotters:match(job)) do
+			local pair = { file = job.file, mime = job.mime }
+			for _, v in pairs(rt.plugin.spotters:match(pair)) do
 				spotter = v
 				break
 			end
 
-			for _, v in pairs(rt.plugin.previewers:match(job)) do
+			for _, v in pairs(rt.plugin.previewers:match(pair)) do
 				previewer = v
 				break
 			end
 
-			for _, v in pairs(rt.plugin.fetchers:match(job)) do
+			for _, v in pairs(rt.plugin.fetchers:match(pair)) do
 				fetchers[#fetchers + 1] = v.name
 			end
 			fetchers = #fetchers ~= 0 and fetchers or { "(none)" }
 
-			for _, v in pairs(rt.plugin.preloaders:match(job)) do
+			for _, v in pairs(rt.plugin.preloaders:match(pair)) do
 				preloaders[#preloaders + 1] = v.name
 			end
 			preloaders = #preloaders ~= 0 and preloaders or { "(none)" }
