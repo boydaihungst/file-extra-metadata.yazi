@@ -304,24 +304,50 @@ function M:render_table(job, opts)
 	)
 	if opts and opts.show_plugins_section then
 		-- TODO: Remove this after the next release
-		local is_yazi_nightly, _ = pcall(require, "mime.dir")
-		local spotter = rt.plugin.spotter(is_yazi_nightly and job.file or job.file.url, job.mime)
-		local previewer = rt.plugin.previewer(is_yazi_nightly and job.file or job.file.url, job.mime)
-		local fetchers = rt.plugin.fetchers(job.file, job.mime)
-		local preloaders = rt.plugin.preloaders(is_yazi_nightly and job.file or job.file.url, job.mime)
-
-		for i, v in ipairs(fetchers) do
-			fetchers[i] = v.cmd
-		end
-		for i, v in ipairs(preloaders) do
-			preloaders[i] = v.cmd
-		end
+		local spotter, previewer, fetchers, preloaders = nil, nil, {}, {}
 
 		rows[#rows + 1] = ui.Row({ { "", "Plugins" }, "" }):height(2):style(styles.header)
-		row(prefix .. "Spotter:", spotter and spotter.cmd or "(none)")
-		row(prefix .. "Previewer:", previewer and previewer.cmd or "(none)")
-		row(prefix .. "Fetchers:", #fetchers ~= 0 and fetchers or "(none)")
-		row(prefix .. "Preloaders:", #preloaders ~= 0 and preloaders or "(none)")
+		if type(rt.plugin.spotters.match) ~= "nil" then
+			for _, v in pairs(rt.plugin.spotters:match(job)) do
+				spotter = v
+				break
+			end
+
+			for _, v in pairs(rt.plugin.previewers:match(job)) do
+				previewer = v
+				break
+			end
+
+			for _, v in pairs(rt.plugin.fetchers:match(job)) do
+				fetchers[#fetchers + 1] = v.name
+			end
+			fetchers = #fetchers ~= 0 and fetchers or { "(none)" }
+
+			for _, v in pairs(rt.plugin.preloaders:match(job)) do
+				preloaders[#preloaders + 1] = v.name
+			end
+			preloaders = #preloaders ~= 0 and preloaders or { "(none)" }
+			row(prefix .. "Spotter:", spotter and spotter.name or "(none)")
+			row(prefix .. "Previewer:", previewer and previewer.name or "(none)")
+			row(prefix .. "Fetchers:", fetchers)
+			row(prefix .. "Preloaders:", preloaders)
+		else
+			local is_yazi_nightly, _ = pcall(require, "mime.dir")
+			spotter = rt.plugin.spotter(is_yazi_nightly and job.file or job.file.url, job.mime)
+			previewer = rt.plugin.previewer(is_yazi_nightly and job.file or job.file.url, job.mime)
+			fetchers = rt.plugin.fetchers(job.file, job.mime)
+			preloaders = rt.plugin.preloaders(is_yazi_nightly and job.file or job.file.url, job.mime)
+			for i, v in ipairs(fetchers) do
+				fetchers[i] = v.cmd
+			end
+			for i, v in ipairs(preloaders) do
+				preloaders[i] = v.cmd
+			end
+			row(prefix .. "Spotter:", spotter and spotter.cmd or "(none)")
+			row(prefix .. "Previewer:", previewer and previewer.cmd or "(none)")
+			row(prefix .. "Fetchers:", #fetchers ~= 0 and fetchers or "(none)")
+			row(prefix .. "Preloaders:", #preloaders ~= 0 and preloaders or "(none)")
+		end
 	end
 
 	return ui.Table(rows):area(job.area):row(1):col(1):col_style(styles.row_value):widths({
