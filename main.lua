@@ -237,7 +237,7 @@ end
 function M:render_table(job, opts)
 	local styles = {
 		header = th.spot.title or ui.Style():fg("green"),
-		row_label = ui.Style():fg(App and App.bg() or "reset"),
+		row_label = ui.Style():fg("reset"),
 		row_value = th.spot.tbl_col or ui.Style():fg("blue"),
 	}
 	local filesystem_extra = get_filesystem_extra(job.file)
