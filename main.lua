@@ -100,8 +100,13 @@ local function get_filesystem_extra(file)
 	}
 	local h = file
 	local file_url = h.url
-	local is_virtual = file_url.scheme and file_url.scheme.is_virtual
-	file_url = is_virtual and (file.path or Url(file_url.scheme.cache .. tostring(file_url.path))) or file_url
+	local is_virtual = (file_url.spec and file_url.spec.is_virtual) or (file_url.scheme and file_url.scheme.is_virtual)
+	file_url = is_virtual
+			and (file.path or Url(
+				((file_url.spec and file_url.spec.cache) or (file_url.scheme and file_url.scheme.cache))
+					.. tostring(file_url.path)
+			))
+		or file_url
 	if not h or ya.target_family() ~= "unix" then
 		return result
 	end
@@ -192,8 +197,13 @@ local function attributes(file)
 	if h.cha.is_link then
 		file_url = Url(h.link_to)
 	end
-	local is_virtual = file_url.scheme and file_url.scheme.is_virtual
-	file_url = is_virtual and (file.path or Url(file_url.scheme.cache .. tostring(file_url.path))) or file_url
+	local is_virtual = (file_url.spec and file_url.spec.is_virtual) or (file_url.scheme and file_url.scheme.is_virtual)
+	file_url = is_virtual
+			and (file.path or Url(
+				((file_url.spec and file_url.spec.cache) or (file_url.scheme and file_url.scheme.cache))
+					.. tostring(file_url.path)
+			))
+		or file_url
 
 	if not h or ya.target_family() ~= "unix" then
 		return ""
