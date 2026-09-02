@@ -56,6 +56,16 @@ local file_size_and_folder_childs = function(file)
 		return ""
 	end
 
+	if h.cha.is_dir and ya.target_family() == "unix" then
+		local output, _ = Command("du"):arg({ "-sb", tostring(h.url) }):stdout(Command.PIPED):output()
+		if output and output.status and output.status.success then
+			local size = output.stdout and output.stdout:match("^(%d+)")
+			if size then
+				return ya.readable_size(tonumber(size))
+			end
+		end
+	end
+
 	return h.cha.len and ya.readable_size(h.cha.len) or ""
 end
 
