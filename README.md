@@ -1,5 +1,14 @@
 # file-extra-metadata
 
+> [!IMPORTANT]
+> This repository is deprecated  
+> This project is no longer actively maintained,  
+> and there will be no more updates to this repository.  
+> If you've made a fork or a newer, actively maintained version of this project,  
+> feel free to share it in the Issues page.  
+> This way, newcomers can easily find an up-to-date alternative.
+> Forks, improvements, and alternative implementations are always welcome!
+
 <!--toc:start-->
 
 - [file-extra-metadata](#file-extra-metadata)
@@ -14,7 +23,7 @@
 This is a Yazi plugin that replaces the default file previewer and spotter with extra information.
 
 > [!IMPORTANT]
-> Minimum version: yazi v26.5.6
+> yazi >= v26.5.6 and <= v26.9.1
 
 ## Preview
 
